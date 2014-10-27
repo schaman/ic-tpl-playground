@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Getting started with JSON Form</title>
-    <link rel="stylesheet" style="text/css" href="jsonform/deps/opt/bootstrap.css" />
-  </head>
-  <body>
-    <h1>Getting started with JSON Form</h1>
-    <form></form>
-    <div id="res" class="alert"></div>
-    <script type="text/javascript" src="jsonform/deps/jquery.min.js"></script>
-    <script type="text/javascript" src="jsonform/deps/underscore.js"></script>
-    <script type="text/javascript" src="jsonform/deps/opt/jsv.js"></script>
-    <script type="text/javascript" src="jsonform/lib/jsonform.js"></script>
-    <script type="text/javascript" src="yaml.js"></script>
+<head>
+  <meta charset="utf-8" />
+  <title>JSON Form</title>
+  <link rel="stylesheet" style="text/css" href="jsonform/deps/opt/bootstrap.css" />
+</head>
+<body>
+
+<div class="container">
+  <h1 id="pagetitle">JSON Form</h1>
+  <form></form>
+  <div id="res" class="alert"></div>
+</div>
+
+<script type="text/javascript" src="jsonform/deps/jquery.min.js"></script>
+<script type="text/javascript" src="jsonform/deps/underscore.js"></script>
+<script type="text/javascript" src="jsonform/deps/opt/jsv.js"></script>
+<script type="text/javascript" src="jsonform/lib/jsonform.js"></script>
+<script type="text/javascript" src="yaml.js"></script>
+
 <style type="text/css">
 .jsonform-required > label:after {
   content: ' *';
@@ -47,6 +52,8 @@
   }
 
   var schema = YAML.parse(getRemote('data/schema.yaml'));
+
+  $('title, #pagetitle').html(schema.title);
 
   function fixRequired(obj)
   {
@@ -120,14 +127,29 @@
   }  
 
   var form = generateForm(schema, []);
+
+  form.push({
+    type: 'actions',
+    items: [
+      {
+        type: 'submit',
+        title: 'Submit'
+      },
+      {
+        type: 'button',
+        title: 'Cancel'
+      }
+    ]
+  });
+
   console.log(JSON.stringify(form, true));
 
   $('form').jsonForm({
     schema: schema,
-    form: form,
+    //form: form,
     onSubmit: function (errors, values) {
       if (errors) {
-        $('#res').html('<p>I beg your pardon?</p>');
+        $('#res').html(JSON.stringify(errors));//'<p>I beg your pardon?</p>');
       }
       else {
         $('#res').html('<p>Hello ' + values.name + '.' +
