@@ -1,0 +1,162 @@
+title: Offer
+type: object
+
+properties:
+  title: { type: string, title: Title }
+
+  intro:    { $ref: "#/definitions/intro" }
+  about:    { $ref: "#/definitions/about" }
+  pricing:  { $ref: "#/definitions/pricing" }
+  features: { $ref: "#/definitions/features" }
+  authors:  { $ref: "#/definitions/authors" }
+  reviews:  { $ref: "#/definitions/reviews" }
+  form:     { $ref: "#/definitions/form" }
+
+required: [title]
+additionalProperties: false
+
+definitions:
+
+  button:
+    type: object
+    title: Button
+    properties:
+      text:   { type: string, title: Text }
+    required: [text]
+    additionalProperties: false
+
+  intro:
+    type: object
+    title: Intro
+    properties:
+      title:  { type: string, title: Title }
+      text:   { type: string, title: Text }
+      button: { $ref: "#/definitions/button" }
+    required: [title, text, button]
+    additionalProperties: false
+
+  article:
+    type: object
+    title: Article
+    properties:
+      title:  { type: string, title: Title }
+      text:   { type: string, title: Text }
+    required: [title, text]
+    additionalProperties: false
+
+  about:
+    type: object
+    title: About
+    properties:
+      title:    { type: string, title: Title }
+      subtitle: { type: string, title: Subtitle }
+      items:
+        type: array
+        title: Items
+        items: { $ref: "#/definitions/article" }
+    required: [title, items]
+    additionalProperties: false
+
+  review:
+    type: object
+    title: Review
+    properties:
+      picture: { type: string, title: Picture, format: uri }
+      title:  { type: string, title: Title }
+      text:   { type: string, title: Text }
+    required: [picture, title, text]
+    additionalProperties: false
+
+  reviews:
+    type: object
+    title: Reviews
+    properties:
+      title:    { type: string, title: Title }
+      subtitle: { type: string, title: Subtitle }
+      items:
+        type: array
+        title: Items
+        items: { $ref: "#/definitions/review" }
+    required: [title, items]
+    additionalProperties: false
+
+  price:
+    type: object
+    title: Price
+    properties:
+      price:    { type: string, title: Price }
+      title:    { type: string, title: Title }
+      subtitle: { type: string, title: Subtitle }
+      features: { type: array, title: Features, items: { type: string, title: Items } }
+      button:   { $ref: "#/definitions/button" }
+    required: [price, title, features, button]
+    additionalProperties: false
+
+  pricing:
+    type: object
+    title: Pricing
+    properties:
+      title:    { type: string, title: Title }
+      subtitle: { type: string, title: Subtitle }
+      items:
+        type: array
+        title: Items
+        items: { $ref: "#/definitions/price" }
+    required: [title, items]
+    additionalProperties: false
+
+  author:
+    type: object
+    title: Author
+    properties:
+      name:  { type: string, title: Name }
+      title:  { type: string, title: Title }
+      text:   { type: string, title: Text }
+      button: { $ref: "#/definitions/button" }
+    required: [name, title, text, button]
+    additionalProperties: false
+
+  authors:
+    type: object
+    title: Authors
+    properties:
+      title:    { type: string, title: Title }
+      subtitle: { type: string, title: Subtitle }
+      items:
+        type: array
+        title: Items
+        items: { $ref: "#/definitions/author" }
+    required: [title, items]
+    additionalProperties: false
+
+  feature:
+    type: object
+    title: Feature
+    properties:
+      title:  { type: string, title: Title }
+      text:   { type: string, title: Text }
+    required: [title, text]
+    additionalProperties: false
+
+  features:
+    type: object
+    title: Features
+    properties:
+      title:    { type: string, title: Title }
+      subtitle: { type: string, title: Subtitle }
+      items:
+        type: array
+        title: Items
+        items: { $ref: "#/definitions/feature" }
+    required: [title, items]
+    additionalProperties: false
+
+  form:
+    type: object
+    title: Form
+    properties:
+      title:    { type: string, title: Title }
+      subtitle: { type: string, title: Subtitle }
+      text:     { type: string, title: Text }
+    required: [title, text]
+    additionalProperties: false

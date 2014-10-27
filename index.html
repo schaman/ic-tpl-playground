@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Getting started with JSON Form</title>
+    <link rel="stylesheet" style="text/css" href="jsonform/deps/opt/bootstrap.css" />
+  </head>
+  <body>
+    <h1>Getting started with JSON Form</h1>
+    <form></form>
+    <div id="res" class="alert"></div>
+    <script type="text/javascript" src="jsonform/deps/jquery.min.js"></script>
+    <script type="text/javascript" src="jsonform/deps/underscore.js"></script>
+    <script type="text/javascript" src="jsonform/deps/opt/jsv.js"></script>
+    <script type="text/javascript" src="jsonform/lib/jsonform.js"></script>
+    <script type="text/javascript" src="yaml.js"></script>
+<style type="text/css">
+.jsonform-required > label:after {
+  content: ' *';
+  color: red;
+}
+
+.jsonform-hasrequired:after {
+  content: '* Required field';
+  display: block;
+  color: red;
+  padding-top: 1em;
+}
+.expandable {
+  cursor: pointer;
+}
+.expandable > legend:before {
+  content: '\25B8';
+  padding-right: 5px;
+}
+.expanded > legend:before {
+  content: '\25BE';
+}
+</style>
+<script type="text/javascript">
+  function getRemote(remote_url) {
+    return $.ajax({
+      type: "GET",
+      url: remote_url,
+      async: false
+    }).responseText;
+  }
+
+  var schema = YAML.parse(getRemote('data/schema.yaml'));
+
+  function fixRequired(obj)
+  {
+    if (
+      Object.prototype.toString.call(obj.required) == '[object Array]'
+      && obj.properties)
+    {
+      obj.required.forEach(function(p, index, array){
+        obj.properties[p].required = true;
+      })
+    };
+
+    Object.keys(obj).forEach(function(prop, index, array){
+      var def = obj[prop];
+      if (typeof def === 'object') {
+        fixRequired(def);
+      }
+    })
+  }
+
+  fixRequired(schema);
+  console.log(schema);
+
+  function resolveRefs(obj, defs)
+  {
+    Object.keys(obj).forEach(function(prop, index, array){
+      var def = obj[prop];
+
+      if (def.$ref) {
+        var ref = def.$ref.replace(/^#\/definitions\//, '');
+        obj[prop] = defs[ref];
+      } else if (typeof def === 'object') {
+        resolveRefs(def, defs);
+      }
+    })
+  }
+
+  resolveRefs(schema, schema.definitions);
+
+  function generateForm(obj, path)
+  {
+    var form = [];
+
+    Object.keys(obj.properties).forEach(function(prop){
+      var item;
+      var itempath = path.concat([prop]);
+      property = obj.properties[prop];
+
+      switch (property.type) {
+        case 'string':
+          item = {
+            key: itempath.join('.'),
+            type: 'text'
+          };
+          break;
+        case 'object':
+          item = {
+            type: 'fieldset',
+            title: property.title,
+            expandable: true
+          };
+          item.items = generateForm(property, itempath);
+          break;
+      }
+
+      if (item) form.push(item);
+      //obj.properties[prop];
+    })
+
+    return form;
+  }  
+
+  var form = generateForm(schema, []);
+  console.log(JSON.stringify(form, true));
+
+  $('form').jsonForm({
+    schema: schema,
+    form: form,
+    onSubmit: function (errors, values) {
+      if (errors) {
+        $('#res').html('<p>I beg your pardon?</p>');
+      }
+      else {
+        $('#res').html('<p>Hello ' + values.name + '.' +
+          (values.age ? '<br/>You are ' + values.age + '.' : '') +
+          '</p>');
+      }
+    }
+  });
+</script>
+  </body>
+</html>
