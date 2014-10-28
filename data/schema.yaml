@@ -2,14 +2,18 @@ title: Offer
 type: object
 
 properties:
-  title: { type: string, title: Title }
+  title: 
+    type: string
+    title: Title
+    default: "Wolfram - Customizable One Page Template"
 
-  sections:
-    type: array
-    title: Sections
-    items:
-      type: string
-      enum: [intro, about, pricing, features, authors, reviews, form]
+  intro:    { $ref: "sections/intro.schema.yaml" }
+  about:    { $ref: "sections/about.schema.yaml" }
+  pricing:  { $ref: "sections/pricing.schema.yaml" }
+  features: { $ref: "sections/features.schema.yaml" }
+  authors:  { $ref: "sections/authors.schema.yaml" }
+  reviews:  { $ref: "sections/reviews.schema.yaml" }
+  form:     { $ref: "sections/form.schema.yaml" }
 
 required: [title]
 additionalProperties: false

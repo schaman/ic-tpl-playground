@@ -1,48 +1,62 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <title>JSON Form</title>
-  <link rel="stylesheet" style="text/css" href="jsonform/deps/opt/bootstrap.css" />
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <title>Basic JSON Editor Example</title>
+    <link rel="stylesheet" href="lib/bootstrap-3.2.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="lib/font-awesome-4.2.0/css/font-awesome.min.css"/>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Basic JSON Editor Example</h1>
 
-<div class="container">
-  <h1 id="pagetitle">JSON Form</h1>
-  <form></form>
-  <div id="res" class="alert"></div>
-</div>
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="active"><a href="#offer" role="tab" data-toggle="tab">Offer</a></li>
+        <li><a href="#profile" role="tab" data-toggle="tab">Profile</a></li>
+        <li><a href="#messages" role="tab" data-toggle="tab">Messages</a></li>
+        <li><a href="#settings" role="tab" data-toggle="tab">Settings</a></li>
+      </ul>
 
-<script type="text/javascript" src="jsonform/deps/jquery.min.js"></script>
-<script type="text/javascript" src="jsonform/deps/underscore.js"></script>
-<script type="text/javascript" src="jsonform/deps/opt/jsv.js"></script>
-<script type="text/javascript" src="jsonform/lib/jsonform.js"></script>
-<script type="text/javascript" src="yaml.js"></script>
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div class="tab-pane fade active" id="offer">
+          <div id='offer-editor'></div>
+        </div>
+        <div class="tab-pane" id="profile">...</div>
+        <div class="tab-pane" id="messages">...</div>
+        <div class="tab-pane" id="settings">...</div>
+      </div>
 
-<style type="text/css">
-.jsonform-required > label:after {
-  content: ' *';
-  color: red;
-}
+      
+      <button id='submit' class="btn btn-primary">Submit (console.log)</button>
+    </div>
+    
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/bootstrap-3.2.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="lib/yaml.js"></script>
 
-.jsonform-hasrequired:after {
-  content: '* Required field';
-  display: block;
-  color: red;
-  padding-top: 1em;
-}
-.expandable {
-  cursor: pointer;
-}
-.expandable > legend:before {
-  content: '\25B8';
-  padding-right: 5px;
-}
-.expanded > legend:before {
-  content: '\25BE';
-}
-</style>
-<script type="text/javascript">
+    <script src="lib/jsoneditor.js"></script>
+
+<script>
+  var schema = YAML.parse(getRemote('data/schema.yaml'));
+
+  function resolveRefs(obj, base)
+  {
+    Object.keys(obj).forEach(function(prop, index, array){
+      var def = obj[prop];
+
+      if (def.$ref) {
+        var ref = def.$ref;
+        obj[prop] = YAML.parse(getRemote(base + ref));
+      } else if (typeof def === 'object') {
+        resolveRefs(def, base);
+      }
+    })
+  }
+
+  resolveRefs(schema, 'data/');
+
   function getRemote(remote_url) {
     return $.ajax({
       type: "GET",
@@ -51,113 +65,23 @@
     }).responseText;
   }
 
-  var schema = YAML.parse(getRemote('data/schema.yaml'));
-
-  $('title, #pagetitle').html(schema.title);
-
-  function fixRequired(obj)
-  {
-    if (
-      Object.prototype.toString.call(obj.required) == '[object Array]'
-      && obj.properties)
-    {
-      obj.required.forEach(function(p, index, array){
-        obj.properties[p].required = true;
-      })
-    };
-
-    Object.keys(obj).forEach(function(prop, index, array){
-      var def = obj[prop];
-      if (typeof def === 'object') {
-        fixRequired(def);
-      }
-    })
-  }
-
-  fixRequired(schema);
   console.log(schema);
 
-  function resolveRefs(obj, defs)
-  {
-    Object.keys(obj).forEach(function(prop, index, array){
-      var def = obj[prop];
-
-      if (def.$ref) {
-        var ref = def.$ref.replace(/^#\/definitions\//, '');
-        obj[prop] = defs[ref];
-      } else if (typeof def === 'object') {
-        resolveRefs(def, defs);
-      }
-    })
-  }
-
-  resolveRefs(schema, schema.definitions);
-
-  function generateForm(obj, path)
-  {
-    var form = [];
-
-    Object.keys(obj.properties).forEach(function(prop){
-      var item;
-      var itempath = path.concat([prop]);
-      property = obj.properties[prop];
-
-      switch (property.type) {
-        case 'string':
-          item = {
-            key: itempath.join('.'),
-            type: 'text'
-          };
-          break;
-        case 'object':
-          item = {
-            type: 'fieldset',
-            title: property.title,
-            expandable: true
-          };
-          item.items = generateForm(property, itempath);
-          break;
-      }
-
-      if (item) form.push(item);
-      //obj.properties[prop];
-    })
-
-    return form;
-  }  
-
-  var form = generateForm(schema, []);
-
-  form.push({
-    type: 'actions',
-    items: [
-      {
-        type: 'submit',
-        title: 'Submit'
-      },
-      {
-        type: 'button',
-        title: 'Cancel'
-      }
-    ]
-  });
-
-  console.log(JSON.stringify(form, true));
-
-  $('form').jsonForm({
+  // Initialize the editor with a JSON schema
+  var editor = new JSONEditor(document.getElementById('offer-editor'),{
     schema: schema,
-    //form: form,
-    onSubmit: function (errors, values) {
-      if (errors) {
-        $('#res').html(JSON.stringify(errors));//'<p>I beg your pardon?</p>');
-      }
-      else {
-        $('#res').html('<p>Hello ' + values.name + '.' +
-          (values.age ? '<br/>You are ' + values.age + '.' : '') +
-          '</p>');
-      }
-    }
+    startval: YAML.parse(getRemote('data/data.yaml')),
+    theme: 'bootstrap3',
+    iconlib: 'fontawesome4',
+    object_layout: 'grid'
+  });
+  
+  // Hook up the submit button to log to the console
+  document.getElementById('submit').addEventListener('click',function() {
+    // Get the value from the editor
+    console.log(editor.getValue());
   });
 </script>
+
   </body>
 </html>
