@@ -5,6 +5,11 @@
     <title>Basic JSON Editor Example</title>
     <link rel="stylesheet" href="lib/bootstrap-3.2.0/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="lib/font-awesome-4.2.0/css/font-awesome.min.css"/>
+<style type="text/css">
+#offer-editor textarea {
+  height: 100px;
+}
+</style>
   </head>
   <body>
     <div class="container">
@@ -12,23 +17,19 @@
 
       <!-- Nav tabs -->
       <ul class="nav nav-tabs" role="tablist">
-        <li class="active"><a href="#offer" role="tab" data-toggle="tab">Offer</a></li>
-        <li><a href="#profile" role="tab" data-toggle="tab">Profile</a></li>
-        <li><a href="#messages" role="tab" data-toggle="tab">Messages</a></li>
-        <li><a href="#settings" role="tab" data-toggle="tab">Settings</a></li>
+        <li class="active"><a href="#edit" role="tab" data-toggle="tab">Edit</a></li>
+        <li><a href="#preview" role="tab" data-toggle="tab">Preview</a></li>
       </ul>
 
       <!-- Tab panes -->
       <div class="tab-content">
-        <div class="tab-pane fade active" id="offer">
+        <div class="tab-pane active" id="edit">
           <div id='offer-editor'></div>
         </div>
-        <div class="tab-pane" id="profile">...</div>
-        <div class="tab-pane" id="messages">...</div>
-        <div class="tab-pane" id="settings">...</div>
+        <div class="tab-pane" id="preview">
+        </div>
       </div>
 
-      
       <button id='submit' class="btn btn-primary">Submit (console.log)</button>
     </div>
     
@@ -49,6 +50,7 @@
       if (def.$ref) {
         var ref = def.$ref;
         obj[prop] = YAML.parse(getRemote(base + ref));
+        obj[prop].options = { collapsed: true };
       } else if (typeof def === 'object') {
         resolveRefs(def, base);
       }
@@ -73,7 +75,8 @@
     startval: YAML.parse(getRemote('data/data.yaml')),
     theme: 'bootstrap3',
     iconlib: 'fontawesome4',
-    object_layout: 'grid'
+    disable_edit_json: true,
+    //object_layout: 'grid'
   });
   
   // Hook up the submit button to log to the console

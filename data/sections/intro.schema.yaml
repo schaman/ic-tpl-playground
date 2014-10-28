@@ -1,14 +1,8 @@
 type: object
 title: Intro
 properties:
-  title:  { type: string, title: Title }
-  text:   { type: string, title: Text, format: textarea }
-  button:
-    type: object
-    title: Button
-    properties:
-      text:   { type: string, title: Text }
-    required: [text]
-    additionalProperties: false
-required: [title, text, button]
+  title:      { type: string, title: Title }
+  text:       { type: string, title: Text, format: textarea }
+  buttontext: { type: string, title: Button text }
+required: [title, text, buttontext]
 additionalProperties: false

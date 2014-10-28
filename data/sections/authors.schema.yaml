@@ -13,14 +13,8 @@ properties:
         name:  { type: string, title: Name }
         title:  { type: string, title: Title }
         text:   { type: string, title: Text, format: textarea }
-        button:
-          type: object
-          title: Button
-          properties:
-            text:   { type: string, title: Text }
-          required: [text]
-          additionalProperties: false
-      required: [name, title, text, button]
+        buttontext: { type: string, title: Button text }
+      required: [name, title, text, buttontext]
       additionalProperties: false
 required: [title, items]
 additionalProperties: false
